@@ -10,7 +10,7 @@ def open_search_file():
     else:
         text_area.delete("1.0", tk.END)
         text_area.insert(tk.END, "previous_search.txt not found.")
-def switch_language():
+def switch_language(event=None):
     global lang
     if lang == 'ru':
         lang = 'en'
@@ -43,22 +43,26 @@ def on_closing():
         with open("previous_search.txt", "w", encoding="utf-8") as file:
             file.write(current_content)
     root.destroy()
-    file.close
 root = tk.Tk()
 root.title("WIKIPEDIA(made by xeon)")
 root.geometry("1024x768")
 root.configure(bg="#d1d1d1")
-label = tk.Label(root, text="Enter request:\n(All your previous searchs saves in previous_search.txt)", bg=("#d1d1d1") , font=('Ink Free', 24))
-label.pack(pady=10,)
-entry = tk.Entry(root, width=50000, bg="#bfbfbf", fg="#000000", bd=0 , font=('Segoe Script', 12))
-entry.pack(padx=10,pady=5)
-switch_button = tk.Button(root, width=50000, text="RU", command=switch_language, bg="#e0e0e0", fg="#000000", bd=0,)
-switch_button.pack(padx=10,pady=5)
-search_button = tk.Button(root, text="Search", width=50000, command=search_wikipedia, bg="#e0e0e0", fg="#000000", bd=0)
-search_button.pack(padx=10,pady=5)
-open_file_button = tk.Button(root, text="Open file with previous searches",width=50000, command=open_search_file, bg="#e0e0e0", fg="#000000", bd=0,)
-open_file_button.pack(padx=10,pady=5)
+root.bind('<Control-Alt_L>', switch_language)
+root.bind('<Control-Alt_R>', switch_language)
+label = tk.Label(root, text="Enter request:\n(All your previous searchs saves in previous_search.txt)\nAlso you can swap language by CTRL+2xALT", bg=("#d1d1d1") , font=('Ink Free', 24))
+label.pack(padx=10,pady=10)
+control_frame = tk.Frame(root, bg="#d1d1d1")
+control_frame.pack(padx=10, pady=5)
+entry = tk.Entry(control_frame, width=50, bg="#bfbfbf", fg="#000000", bd=0 , font=('Segoe Script', 12))
+entry.grid(row=1, column=1,padx = 5)
+entry.bind("<Return>", lambda event: search_wikipedia())
+switch_button = tk.Button(control_frame, text="RU", command=switch_language, bg="#e0e0e0", fg="#000000", bd=0,)
+switch_button.grid(row=1, column=3,padx = 5)
+search_button = tk.Button(control_frame, text="🔎", command=search_wikipedia, bg="#e0e0e0", fg="#000000", bd=0)
+search_button.grid(row=1, column=2,padx = 5)
+open_file_button = tk.Button(control_frame, text="Open file with previous searches", command=open_search_file, bg="#e0e0e0", fg="#000000", bd=0,)
+open_file_button.grid(row=1, column=4 , padx = 5)
 text_area = st.ScrolledText(root, width=10000, height=5000, bg="#b3b3b3", fg="Black", bd=0, font=('Segoe Script', 12))
-text_area.pack(padx=10, pady=10)
+text_area.pack(padx=10, pady=5)
 root.protocol("WM_DELETE_WINDOW", on_closing)
 root.mainloop()
