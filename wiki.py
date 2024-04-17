@@ -3,21 +3,27 @@ import tkinter as tk
 from tkinter import scrolledtext as st
 import os
 import subprocess
-lang = 'RU'
+languages = {
+    'EN':'en',
+    'RU':'ru',
+    'DE':'de',
+    'FR':'fr',
+    'ES':'es',
+    'ZH':'zh',
+    'JA':'ja',
+    'KO':'ko'
+}
+lang = 'EN'
 def open_search_file():
     if os.path.isfile("previous_search.txt"):
         subprocess.run(['notepad.exe', 'previous_search.txt'])
     else:
         text_area.delete("1.0", tk.END)
         text_area.insert(tk.END, "previous_search.txt not found.")
-def switch_language(event=None):
+def switch_language(new_lang):
     global lang
-    if lang == 'ru':
-        lang = 'en'
-        switch_button.config(text="ENG", bg="#e0e0e0", fg="#000000",)
-    else:
-        lang = 'ru'
-        switch_button.config(text="RU", bg="#e0e0e0", fg="#000000",)
+    lang = new_lang
+    wikipedia.set_lang(languages[lang.upper()])
 def search_wikipedia():
     query = entry.get()
     try:
@@ -25,18 +31,17 @@ def search_wikipedia():
         if current_content.strip():
             with open("previous_search.txt", "w", encoding="utf-8") as file:
                 file.write(current_content)
-                file.close
-        wikipedia.set_lang(lang)
+        wikipedia.set_lang(languages[lang.upper()])  # Добавлено upper()
         result = wikipedia.page(query)
-        text_area.delete(1.0,tk.END)
+        text_area.delete(1.0, tk.END)
         text_area.insert(tk.END, result.content)
     except wikipedia.exceptions.DisambiguationError as e:
         options = ", ".join(e.options)
-        text_area.delete(1.0,tk.END)
-        text_area.insert(tk.END, f"Please specify your question,there is some options: {options}")
+        text_area.delete(1.0, tk.END)
+        text_area.insert(tk.END, f"Please specify your question, there are some options: {options}")
     except wikipedia.exceptions.PageError:
-        text_area.delete(1.0,tk.END)
-        text_area.insert(tk.END, "Nothing was found on wikipedia.")
+        text_area.delete(1.0, tk.END)
+        text_area.insert(tk.END, "Nothing was found on Wikipedia.")
 def on_closing():
     current_content = text_area.get("1.0", tk.END)
     if current_content.strip():
@@ -53,12 +58,14 @@ label = tk.Label(root, text="Enter request:\n(All your previous searchs saves in
 label.pack(padx=10,pady=10)
 control_frame = tk.Frame(root, bg="#d1d1d1")
 control_frame.pack(padx=10, pady=5)
-entry = tk.Entry(control_frame, width=50, bg="#bfbfbf", fg="#000000", bd=0 , font=('Segoe Script', 12))
+entry = tk.Entry(control_frame, width=50 , bg="#bfbfbf", fg="#000000", bd=0 , font=('Segoe Script', 12))
 entry.grid(row=1, column=1,padx = 5)
 entry.bind("<Return>", lambda event: search_wikipedia())
-switch_button = tk.Button(control_frame, text="RU", command=switch_language, bg="#e0e0e0", fg="#000000", bd=0,)
-switch_button.grid(row=1, column=3,padx = 5)
-search_button = tk.Button(control_frame, text="🔎", command=search_wikipedia, bg="#e0e0e0", fg="#000000", bd=0)
+language_var = tk.StringVar(value=lang,)
+language_menu = tk.OptionMenu(control_frame, language_var, *languages.keys(), command=switch_language)
+language_menu.config(bg="#e0e0e0", fg="#000000",bd=0,highlightthickness=0)
+language_menu.grid(row=1, column=12, padx=5)
+search_button = tk.Button(control_frame, text="🔎", height=1 ,width= 2,command=search_wikipedia, bg="#e0e0e0", fg="#000000", bd=0)
 search_button.grid(row=1, column=2,padx = 5)
 open_file_button = tk.Button(control_frame, text="Open file with previous searches", command=open_search_file, bg="#e0e0e0", fg="#000000", bd=0,)
 open_file_button.grid(row=1, column=4 , padx = 5)
